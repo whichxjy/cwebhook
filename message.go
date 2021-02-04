@@ -65,7 +65,7 @@ func parseSignature(signature string) ([]byte, func() hash.Hash, error) {
 		return nil, nil, errors.New("missing signature")
 	}
 
-	sigParts := strings.SplitN(signature, "=", 2)
+	sigParts := strings.SplitN(signature, Equal, 2)
 	if len(sigParts) != 2 {
 		return nil, nil, fmt.Errorf("error parsing signature %v", signature)
 	}
