@@ -6,8 +6,10 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"hash"
+	"strings"
 )
 
 const (
@@ -56,4 +58,41 @@ func CreateSignature(timestamp, payload, secret []byte, hashAlgo string) (string
 	hexMAC := hex.EncodeToString(mac)
 	signature := hashAlgo + Equal + hexMAC
 	return signature, nil
+}
+
+func parseSignature(signature string) ([]byte, func() hash.Hash, error) {
+	if signature == "" {
+		return nil, nil, errors.New("missing signature")
+	}
+
+	sigParts := strings.SplitN(signature, "=", 2)
+	if len(sigParts) != 2 {
+		return nil, nil, fmt.Errorf("error parsing signature %v", signature)
+	}
+
+	hashFunc, err := getHashFunc(sigParts[0])
+	if err != nil {
+		return nil, nil, err
+	}
+
+	mac, err := hex.DecodeString(sigParts[1])
+	if err != nil {
+		return nil, nil, fmt.Errorf("error decoding signature %v: %v", signature, err)
+	}
+
+	return mac, hashFunc, nil
+}
+
+func Validate(signature string, timestamp, payload, secret []byte) error {
+	mac, hashFunc, err := parseSignature(signature)
+	if err != nil {
+		return err
+	}
+
+	expectMAC := infoToMAC(timestamp, payload, secret, hashFunc)
+	if !hmac.Equal(mac, expectMAC) {
+		return errors.New("signature check failed")
+	}
+
+	return nil
 }
