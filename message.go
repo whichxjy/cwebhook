@@ -26,7 +26,7 @@ func generateMAC(message, key []byte, hashFunc func() hash.Hash) []byte {
 }
 
 func infoToMAC(timestamp, payload, secret []byte, hashFunc func() hash.Hash) []byte {
-	message := make([]byte, 1, 1+len(timestamp)+len(payload))
+	message := make([]byte, 0, 1+len(timestamp)+len(payload))
 	message = append(message, timestamp...)
 	message = append(message, []byte(Dot)...)
 	message = append(message, payload...)
