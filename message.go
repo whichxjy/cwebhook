@@ -27,7 +27,10 @@ func generateMAC(message, key []byte, hashFunc func() hash.Hash) []byte {
 	return mac.Sum(nil)
 }
 
-func infoToMAC(timestamp, payload, secret []byte, hashFunc func() hash.Hash) []byte {
+func infoToMAC(
+	timestamp, payload, secret []byte,
+	hashFunc func() hash.Hash,
+) []byte {
 	message := make([]byte, 0, 1+len(timestamp)+len(payload))
 	message = append(message, timestamp...)
 	message = append(message, []byte(Dot)...)
@@ -48,7 +51,10 @@ func getHashFunc(hashAlgo string) (func() hash.Hash, error) {
 	}
 }
 
-func CreateSignature(timestamp, payload, secret []byte, hashAlgo string) (string, error) {
+func CreateSignature(
+	timestamp, payload, secret []byte,
+	hashAlgo string,
+) (string, error) {
 	hashFunc, err := getHashFunc(hashAlgo)
 	if err != nil {
 		return "", err
@@ -77,7 +83,11 @@ func parseSignature(signature string) ([]byte, func() hash.Hash, error) {
 
 	mac, err := hex.DecodeString(sigParts[1])
 	if err != nil {
-		return nil, nil, fmt.Errorf("error decoding signature %v: %v", signature, err)
+		return nil, nil, fmt.Errorf(
+			"error decoding signature %v: %v",
+			signature,
+			err,
+		)
 	}
 
 	return mac, hashFunc, nil
